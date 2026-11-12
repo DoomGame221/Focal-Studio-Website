@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Focal Studio - Cover Maker (920×430)</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/images/favicon.svg">
+  <link href="../assets/css/fonts.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #05070a;
+      --surface: #0b1017;
+      --border: rgba(57, 197, 187, 0.35);
+      --miku: #39c5bb;
+      --cyan: #00d8ff;
+      --white: #ffffff;
+      --muted: #94a8b8;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(to right, rgba(57, 197, 187, 0.035) 1px, transparent 1px) 0 0 / 32px 32px,
+        linear-gradient(to bottom, rgba(57, 197, 187, 0.035) 1px, transparent 1px) 0 0 / 32px 32px,
+        var(--bg);
+      color: var(--white);
+      font-family: "Chakra Petch", "Segoe UI", sans-serif;
+      padding: 24px 16px 48px;
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      gap: 22px;
+    }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: 6px 6px 0 #020305;
+    }
+
+    .topbar-title {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .topbar-title img {
+      height: 36px;
+      width: auto;
+    }
+
+    .topbar-title h1 {
+      margin: 0;
+      font-size: 20px;
+      color: var(--white);
+    }
+
+    .topbar-title small {
+      display: block;
+      color: var(--miku);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+    }
+
+    .back-link {
+      color: var(--white);
+      text-decoration: none;
+      padding: 9px 14px;
+      border: 1px solid var(--border);
+      background: #080c12;
+      font-size: 14px;
+    }
+
+    .back-link:hover {
+      border-color: var(--miku);
+      color: var(--miku);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 380px minmax(0, 1fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    @media (max-width: 960px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: 6px 6px 0 #020305;
+      padding: 20px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .panel h2 {
+      margin: 0 0 4px;
+      font-size: 16px;
+      color: var(--miku);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    label.field {
+      display: grid;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    input[type="text"],
+    select,
+    input[type="file"] {
+      width: 100%;
+      padding: 10px 12px;
+      background: #05070a;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--white);
+      font: inherit;
+      font-size: 14px;
+    }
+
+    input[type="text"]:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--miku);
+    }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      padding: 13px 18px;
+      background: var(--miku);
+      color: #05070a;
+      border: 1px solid var(--miku);
+      font: inherit;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      box-shadow: 4px 4px 0 rgba(0, 216, 255, 0.28);
+    }
+
+    .btn-primary:hover {
+      background: var(--white);
+      border-color: var(--white);
+    }
+
+    .btn-secondary {
+      padding: 10px 14px;
+      background: #080c12;
+      color: var(--white);
+      border: 1px solid var(--border);
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--miku);
+      color: var(--miku);
+    }
+
+    .canvas-wrap {
+      background: #040609;
+      border: 1px dashed rgba(57, 197, 187, 0.45);
+      padding: 14px;
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .preview-meta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    pre.json-box {
+      margin: 0;
+      padding: 14px;
+      background: #05070a;
+      border: 1px solid rgba(57, 197, 187, 0.28);
+      color: #bfeef2;
+      font-size: 12px;
+      line-height: 1.55;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="topbar">
+      <div class="topbar-title">
+        <img src="../assets/images/focal-logo.svg" alt="Focal Studio">
+        <div>
+          <h1>COVER FRAME GENERATOR</h1>
+          <small>เครื่องมือสร้างภาพปกขนาด 920×430 (460:215) สำหรับ Focal Studio</small>
+        </div>
+      </div>
+      <a class="back-link" href="../index.html">← กลับหน้าหลักเว็บ</a>
+    </header>
+
+    <div class="workspace">
+      <section class="panel" aria-label="ตั้งค่ากรอบปก">
+        <h2>1. ตั้งค่ากรอบและรูปภาพ</h2>
+
+        <label class="field">
+          เลือกรูปเกม (.bmp, .png, .jpg, .webp)
+          <input id="imageInput" type="file" accept="image/*">
+        </label>
+
+        <label class="field">
+          ป้ายกรอบบน (Tag)
+          <input id="tagInput" type="text" value="FOCAL STUDIO">
+        </label>
+
+        <label class="field">
+          ชื่อเกม (Title)
+          <input id="titleInput" type="text" value="CLANNAD">
+        </label>
+
+        <label class="field">
+          คำรอง (Subtitle)
+          <input id="subtitleInput" type="text" value="THAI PATCH">
+        </label>
+
+        <label class="field">
+          รายละเอียดบรรทัด 1
+          <input id="meta1Input" type="text" value="VISUAL NOVEL // STEAM EDITION">
+        </label>
+
+        <label class="field">
+          รายละเอียดบรรทัด 2
+          <input id="meta2Input" type="text" value="VERSION 1.0  •  WINDOWS INSTALLER">
+        </label>
+
+        <div class="row-2">
+          <label class="field">
+            พื้นหลังฝั่งขวา
+            <select id="rightBgSelect">
+              <option value="white">สีขาว (#ffffff)</option>
+              <option value="dark">สีดำไซเบอร์ (#080c12)</option>
+            </select>
+          </label>
+
+          <label class="field">
+            การจัดวางรูปฝั่งขวา
+            <select id="fitModeSelect">
+              <option value="contain">พอดีกรอบ (ไม่ตัดภาพ)</option>
+              <option value="cover">เต็มกรอบ (ครอปส่วนเกิน)</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="field">
+          ชื่อโฟลเดอร์เกม (สำหรับ JSON Path)
+          <input id="slugInput" type="text" value="clannad">
+        </label>
+
+        <button id="downloadBtn" class="btn-primary" type="button">ดาวน์โหลด cover.png (920×430)</button>
+      </section>
+
+      <section class="panel" aria-label="ตัวอย่างภาพปก">
+        <h2>2. ตัวอย่างผลลัพธ์ (Live Preview)</h2>
+
+        <div class="canvas-wrap">
+          <canvas id="coverCanvas" width="920" height="430"></canvas>
+        </div>
+
+        <div class="preview-meta">
+          <span>ขนาดส่งออก: <strong>920 × 430 px</strong> (อัตราส่วน 460:215 ตรงกับการ์ดหน้าเว็บ)</span>
+          <button id="copyJsonBtn" class="btn-secondary" type="button">คัดลอกโค้ดสำหรับ mods.json</button>
+        </div>
+
+        <pre id="jsonPreview" class="json-box"></pre>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const W = 920;
+      const H = 430;
+      const canvas = document.getElementById('coverCanvas');
+      const ctx = canvas.getContext('2d');
+
+      const inputs = {
+        image: document.getElementById('imageInput'),
+        tag: document.getElementById('tagInput'),
+        title: document.getElementById('titleInput'),
+        subtitle: document.getElementById('subtitleInput'),
+        meta1: document.getElementById('meta1Input'),
+        meta2: document.getElementById('meta2Input'),
+        rightBg: document.getElementById('rightBgSelect'),
+        fitMode: document.getElementById('fitModeSelect'),
+        slug: document.getElementById('slugInput'),
+      };
+
+      const downloadBtn = document.getElementById('downloadBtn');
+      const copyJsonBtn = document.getElementById('copyJsonBtn');
+      const jsonPreview = document.getElementById('jsonPreview');
+
+      let loadedImage = null;
+
+      // Try loading existing Clannad cover/logo preview if available via server, otherwise draw clean placeholder
+      function render() {
+        const rightIsWhite = inputs.rightBg.value === 'white';
+        const fitMode = inputs.fitMode.value;
+
+        ctx.clearRect(0, 0, W, H);
+
+        // 1. Right side base background
+        ctx.fillStyle = rightIsWhite ? '#ffffff' : '#080c12';
+        ctx.fillRect(0, 0, W, H);
+
+        // 2. Draw uploaded image on right half (clipped to diagonal boundary)
+        if (loadedImage) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(540, 0);
+          ctx.lineTo(W, 0);
+          ctx.lineTo(W, H);
+          ctx.lineTo(440, H);
+          ctx.closePath();
+          ctx.clip();
+
+          const boxX = fitMode === 'cover' ? 440 : 548;
+          const boxY = fitMode === 'cover' ? 0 : 8;
+          const boxW = W - boxX - (fitMode === 'cover' ? 0 : 12);
+          const boxH = H - (fitMode === 'cover' ? 0 : 16);
+
+          const scale =
+            fitMode === 'cover'
+              ? Math.max(boxW / loadedImage.width, boxH / loadedImage.height)
+              : Math.min(boxW / loadedImage.width, boxH / loadedImage.height);
+
+          const drawW = loadedImage.width * scale;
+          const drawH = loadedImage.height * scale;
+          const drawX = boxX + (boxW - drawW) / 2;
+          const drawY = boxY + (boxH - drawH) / 2;
+
+          ctx.drawImage(loadedImage, drawX, drawY, drawW, drawH);
+          ctx.restore();
+        } else {
+          // Placeholder hint on right side
+          ctx.fillStyle = rightIsWhite ? '#d0dde4' : '#1b2b36';
+          ctx.font = '600 18px "Chakra Petch", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('อัปโหลดรูปเกมทางซ้ายเพื่อใส่ในกรอบนี้', 725, H / 2);
+          ctx.textAlign = 'left';
+        }
+
+        // 3. Left dark cyber polygon
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(540, 0);
+        ctx.lineTo(440, H);
+        ctx.lineTo(0, H);
+        ctx.closePath();
+        ctx.fillStyle = '#080c12';
+        ctx.fill();
+        ctx.clip();
+
+        // Subtle pixel grid inside left polygon
+        ctx.strokeStyle = '#121e28';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < 540; x += 32) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, H);
+          ctx.stroke();
+        }
+        for (let y = 0; y < H; y += 32) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(540, y);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        // 4. Miku Blue & Cyan diagonal divider stripes
+        ctx.beginPath();
+        ctx.moveTo(534, 0);
+        ctx.lineTo(546, 0);
+        ctx.lineTo(446, H);
+        ctx.lineTo(434, H);
+        ctx.closePath();
+        ctx.fillStyle = '#39c5bb';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(518, 0);
+        ctx.lineTo(523, 0);
+        ctx.lineTo(423, H);
+        ctx.lineTo(418, H);
+        ctx.closePath();
+        ctx.fillStyle = '#00d8ff';
+        ctx.fill();
+
+        // 5. Cyber corner brackets on left
+        ctx.strokeStyle = '#39c5bb';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(28, 74);
+        ctx.lineTo(28, 28);
+        ctx.lineTo(74, 28);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#00d8ff';
+        ctx.beginPath();
+        ctx.moveTo(28, H - 74);
+        ctx.lineTo(28, H - 28);
+        ctx.lineTo(74, H - 28);
+        ctx.stroke();
+
+        // 6. Tag pill
+        const tagText = (inputs.tag.value || 'FOCAL STUDIO').toUpperCase();
+        ctx.font = '700 17px "Chakra Petch", "Segoe UI", sans-serif';
+        const tagW = Math.max(170, ctx.measureText(tagText).width + 34);
+        ctx.fillStyle = '#10242c';
+        ctx.fillRect(48, 86, tagW, 34);
+        ctx.strokeStyle = '#39c5bb';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(48, 86, tagW, 34);
+        ctx.fillStyle = '#39c5bb';
+        ctx.fillText(tagText, 65, 109);
+
+        // 7. Title (auto-fit width <= 410px so it never touches diagonal stripe)
+        const titleText = inputs.title.value || 'GAME TITLE';
+        let titleSize = 62;
+        while (titleSize > 28) {
+          ctx.font = `700 ${titleSize}px "Chakra Petch", "Segoe UI", sans-serif`;
+          if (ctx.measureText(titleText).width <= 400) break;
+          titleSize -= 2;
+        }
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(titleText, 48, 200);
+
+        // 8. Subtitle
+        const subText = inputs.subtitle.value || 'THAI PATCH';
+        ctx.font = '700 26px "Chakra Petch", "Segoe UI", sans-serif';
+        ctx.fillStyle = '#00d8ff';
+        ctx.fillText(subText, 50, 245);
+
+        // 9. Divider bar
+        ctx.fillStyle = '#39c5bb';
+        ctx.fillRect(50, 270, 180, 4);
+
+        // 10. Meta lines
+        ctx.font = '400 16px "Chakra Petch", "Segoe UI", sans-serif';
+        ctx.fillStyle = '#a8c3d2';
+        ctx.fillText(inputs.meta1.value || '', 50, 308);
+        ctx.fillStyle = '#8ca5b4';
+        ctx.fillText(inputs.meta2.value || '', 50, 336);
+
+        updateJsonPreview();
+      }
+
+      function updateJsonPreview() {
+        const slug = (inputs.slug.value || 'game-id')
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9-_]+/g, '-');
+        const title = inputs.title.value.trim() || 'ชื่อเกม';
+
+        const snippet = {
+          id: `${slug}-patch-th`,
+          title: `${title} Patch ไทย`,
+          status: 'published',
+          badge: 'NEW',
+          coverImage: `./assets/images/games/${slug}/cover.png`,
+          screenshots: [],
+          highlights: ['Focal Studio', 'Windows Installer'],
+          updatedAgo: 'ล่าสุด',
+          updatedDate: '12 พ.ย. 2569',
+          gameVersion: 'Steam / PC',
+          modVersion: '1.0',
+          steamUrl: 'https://store.steampowered.com/',
+          downloadUrl: 'https://drive.google.com/...',
+          installGuide: 'วิธีการติดตั้ง Patch นี้จะเหมือนกับการติดตั้งแอปบน Windows เลย (ต้องมีตัวเกมในเครื่องที่ download บน Steam ก่อน)',
+          updates: [
+            {
+              version: 'เวอร์ชั่น 1.0',
+              notes: `- แพตช์แปลภาษาไทยสำหรับเกม ${title}`
+            }
+          ]
+        };
+        jsonPreview.textContent = JSON.stringify(snippet, null, 2);
+      }
+
+      inputs.image.addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const img = new Image();
+          img.onload = () => {
+            loadedImage = img;
+            render();
+          };
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+
+      Object.values(inputs).forEach((el) => {
+        if (el !== inputs.image) {
+          el.addEventListener('input', render);
+          el.addEventListener('change', render);
+        }
+      });
+
+      downloadBtn.addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.download = 'cover.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+
+      copyJsonBtn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(jsonPreview.textContent);
+          copyJsonBtn.textContent = 'คัดลอกแล้ว ✓';
+          setTimeout(() => {
+            copyJsonBtn.textContent = 'คัดลอกโค้ดสำหรับ mods.json';
+          }, 1800);
+        } catch (_err) {
+          copyJsonBtn.textContent = 'เลือกข้อความด้านล่างเพื่อคัดลอก';
+        }
+      });
+
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(render);
+      } else {
+        render();
+      }
+    })();
+  </script>
+</body>
+</html>

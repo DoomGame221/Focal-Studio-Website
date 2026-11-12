@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 160" fill="none" role="img" aria-label="Focal Studio Logo">
+  <defs>
+    <linearGradient id="bladeGrad0" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#007bff"/><stop offset="100%" stop-color="#00d8ff"/></linearGradient><linearGradient id="bladeGrad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0095ff"/><stop offset="100%" stop-color="#39c5bb"/></linearGradient><linearGradient id="bladeGrad2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0066ff"/><stop offset="100%" stop-color="#00c8ff"/></linearGradient><linearGradient id="bladeGrad3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0088ff"/><stop offset="100%" stop-color="#2ee9ff"/></linearGradient><linearGradient id="bladeGrad4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#007bff"/><stop offset="100%" stop-color="#00d8ff"/></linearGradient><linearGradient id="bladeGrad5" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0095ff"/><stop offset="100%" stop-color="#39c5bb"/></linearGradient><linearGradient id="bladeGrad6" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0066ff"/><stop offset="100%" stop-color="#00c8ff"/></linearGradient><linearGradient id="bladeGrad7" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0088ff"/><stop offset="100%" stop-color="#2ee9ff"/></linearGradient><linearGradient id="bladeGrad8" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#007bff"/><stop offset="100%" stop-color="#00d8ff"/></linearGradient><linearGradient id="bladeGrad9" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0095ff"/><stop offset="100%" stop-color="#39c5bb"/></linearGradient><linearGradient id="bladeGrad10" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0066ff"/><stop offset="100%" stop-color="#00c8ff"/></linearGradient><linearGradient id="bladeGrad11" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0088ff"/><stop offset="100%" stop-color="#2ee9ff"/></linearGradient>
+  </defs>
+  <!-- Recreated Faceted Geometric "F" -->
+  <g>
+    <polygon points="18,30 46,30 34,47 18,47" fill="#0066ff"/>
+    <polygon points="46,30 70,30 58,47 34,47" fill="#00c8ff"/>
+    <polygon points="58,47 70,30 70,47" fill="#39c5bb"/>
+    <polygon points="18,47 34,47 18,74" fill="#0088ff"/>
+    <polygon points="34,47 34,63 18,74" fill="#0052e0"/>
+    <polygon points="18,74 34,63 62,63 45,78 18,78" fill="#00c2ff"/>
+    <polygon points="45,78 62,63 62,78" fill="#39c5bb"/>
+    <polygon points="18,78 34,78 18,104" fill="#0099ff"/>
+    <polygon points="34,78 34,112 18,112 18,104" fill="#00e5ff"/>
+  </g>
+  <!-- Wordmark "ocal" + "Studio" -->
+  <text x="78" y="112" fill="#05070a" font-family="'Chakra Petch', 'Segoe UI', Arial, sans-serif" font-size="86" font-weight="700" letter-spacing="-2">ocal</text>
+  <text x="156" y="144" fill="#858f9b" font-family="'Chakra Petch', 'Segoe UI', Arial, sans-serif" font-size="33" font-weight="500" letter-spacing="1.5">Studio</text>
+  <!-- 12-Blade Focal Aperture -->
+  <g>
+    <polygon points="368.0,57.0 423.2,36.9 428.9,45.5 379.0,55.3" fill="url(#bladeGrad0)" stroke="#0066cc" stroke-width="1.1" stroke-linejoin="round"/><polygon points="379.5,60.1 437.3,70.3 438.0,80.6 389.8,64.1" fill="url(#bladeGrad1)" stroke="#0066cc" stroke-width="1.1" stroke-linejoin="round"/><polygon points="387.9,68.5 432.9,106.2 428.3,115.5 394.9,77.2" fill="url(#bladeGrad2)" stroke="#0066cc" stroke-width="1.1" stroke-linejoin="round"/><polygon points="391.0,80.0 411.1,135.2 402.5,140.9 392.7,91.0" fill="url(#bladeGrad3)" stroke="#0066cc" stroke-width="1.1" stroke-linejoin="round"/><polygon points="387.9,91.5 377.7,149.3 367.4,150.0 383.9,101.8" fill="url(#bladeGrad4)" stroke="#0066cc" stroke-width="1.1" stroke-linejoin="round"/><polygon points="379.5,99.9 341.8,144.9 332.5,140.3 370.8,106.9" fill="url(#bladeGrad5)" stroke="#0066cc" stroke-width="1.1" stroke-linejoin="round"/><polygon points="368.0,103.0 312.8,123.1 307.1,114.5 357.0,104.7" fill="url(#bladeGrad6)" stroke="#0066cc" stroke-width="1.1" stroke-linejoin="round"/><polygon points="356.5,99.9 298.7,89.7 298.0,79.4 346.2,95.9" fill="url(#bladeGrad7)" stroke="#0066cc" stroke-width="1.1" stroke-linejoin="round"/><polygon points="348.1,91.5 303.1,53.8 307.7,44.5 341.1,82.8" fill="url(#bladeGrad8)" stroke="#0066cc" stroke-width="1.1" stroke-linejoin="round"/><polygon points="345.0,80.0 324.9,24.8 333.5,19.1 343.3,69.0" fill="url(#bladeGrad9)" stroke="#0066cc" stroke-width="1.1" stroke-linejoin="round"/><polygon points="348.1,68.5 358.3,10.7 368.6,10.0 352.1,58.2" fill="url(#bladeGrad10)" stroke="#0066cc" stroke-width="1.1" stroke-linejoin="round"/><polygon points="356.5,60.1 394.2,15.1 403.5,19.7 365.2,53.1" fill="url(#bladeGrad11)" stroke="#0066cc" stroke-width="1.1" stroke-linejoin="round"/>
+  </g>
+</svg>

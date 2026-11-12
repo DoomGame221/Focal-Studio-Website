@@ -1,0 +1,295 @@
+/* ==========================================================================
+   Focal Studio Theme: Miku Blue (#39c5bb / #00d8ff), White (#ffffff), Black (#05070a)
+   Cyber / Pixel Aesthetic Overrides
+   ========================================================================== */
+
+:root {
+  --bg: #05070a;
+  --bg-soft: #0a0e14;
+  --surface: #0b1017;
+  --surface-muted: #111923;
+  --surface-strong: #ffffff;
+  --text: #e6f6f7;
+  --text-strong: #ffffff;
+  --text-muted: #94a8b8;
+  --border: rgba(57, 197, 187, 0.28);
+  --accent: #39c5bb;
+  --accent-strong: #00d8ff;
+  --accent-soft: rgba(57, 197, 187, 0.16);
+  --accent-2: #ffffff;
+  --accent-2-soft: rgba(255, 255, 255, 0.12);
+  --danger: #ff6b8b;
+  --danger-soft: rgba(255, 107, 139, 0.16);
+  --warning: #00d8ff;
+  --warning-soft: rgba(0, 216, 255, 0.18);
+  --info: #7af2ec;
+  --info-soft: rgba(57, 197, 187, 0.15);
+  --success: #39c5bb;
+  --success-soft: rgba(57, 197, 187, 0.18);
+  --shadow: 0 28px 80px rgba(0, 0, 0, 0.78);
+  --glow-accent: 0 0 26px rgba(57, 197, 187, 0.32);
+  --glow-warning: 0 0 26px rgba(0, 216, 255, 0.32);
+  --px-ink: #020305;
+  --px-edge: rgba(57, 197, 187, 0.65);
+  --px-edge-soft: rgba(57, 197, 187, 0.32);
+  --px-shadow-accent: 5px 5px 0 rgba(57, 197, 187, 0.32);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Subtle Cyber Pixel Grid + Miku Glow */
+body:before {
+  background:
+    linear-gradient(to right, rgba(57, 197, 187, 0.035) 1px, transparent 1px) 0 0 / 32px 32px,
+    linear-gradient(to bottom, rgba(57, 197, 187, 0.035) 1px, transparent 1px) 0 0 / 32px 32px,
+    radial-gradient(85% 65% at -8% -8%, rgba(57, 197, 187, 0.2), transparent 68%),
+    radial-gradient(85% 65% at 108% -8%, rgba(0, 216, 255, 0.16), transparent 68%),
+    radial-gradient(95% 75% at 105% 108%, rgba(255, 255, 255, 0.06), transparent 72%),
+    linear-gradient(125deg, rgba(57, 197, 187, 0.05), transparent 38%, rgba(255, 255, 255, 0.025) 68%, transparent);
+}
+
+/* Ensure dynamically rendered images show immediately */
+.mod-cover-image img,
+.mod-cover-image.is-loaded img {
+  opacity: 1;
+}
+
+/* Hero Core Overrides */
+.mod-core {
+  --core-navy: #05070a;
+  --core-cyan: #39c5bb;
+  --core-gold: #00d8ff;
+  --core-pink: #ffffff;
+  --core-rose: #94f2ec;
+  --core-violet: #38bdf8;
+  --core-mint: #39c5bb;
+  --core-orange: #7ee8fa;
+  --core-muted: #94a8b8;
+  color: #ffffff;
+  background: linear-gradient(#05070a calc(100% - var(--core-edge-fade)), rgba(5, 7, 10, 0));
+}
+
+.mod-core:after {
+  background: linear-gradient(90deg, rgba(5, 7, 10, 0.94), rgba(5, 7, 10, 0.78) 32%, rgba(5, 7, 10, 0.36) 54%, transparent 74%);
+}
+
+.mod-core .core-title {
+  color: #ffffff;
+}
+
+.mod-core .core-title-accent {
+  color: #39c5bb;
+  text-shadow: 0 0 28px rgba(57, 197, 187, 0.45), 4px 4px #020305;
+}
+
+.mod-core .core-description {
+  color: #d6e6ea;
+}
+
+.mod-core .core-eyebrow {
+  color: #39c5bb;
+  letter-spacing: 0.14em;
+}
+
+/* Primary & Secondary Buttons */
+.mod-core .action-main,
+.primary-action {
+  background: #39c5bb;
+  color: #05070a;
+  border-color: #39c5bb;
+  box-shadow: 4px 4px 0 rgba(0, 216, 255, 0.32);
+}
+
+.mod-core .action-main:hover,
+.primary-action:hover:not(:disabled) {
+  background: #ffffff;
+  color: #05070a;
+  border-color: #ffffff;
+}
+
+.mod-core .action-secondary,
+.mod-core .header-link {
+  color: #ffffff;
+  background: rgba(11, 16, 23, 0.85);
+  border-color: rgba(57, 197, 187, 0.45);
+}
+
+.mod-core .action-secondary:hover,
+.mod-core .header-link:hover {
+  border-color: #39c5bb;
+  color: #39c5bb;
+  background: rgba(57, 197, 187, 0.1);
+}
+
+/* Brand Header Logo */
+.core-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.focal-header-logo {
+  height: 44px;
+  width: auto;
+  display: block;
+  filter: drop-shadow(0 0 12px rgba(57, 197, 187, 0.28));
+}
+
+/* Hero Visual Focal Studio Centerpiece (Pixel-Cyber Frame) */
+.mod-core .scene-host {
+  display: grid;
+  place-items: center;
+}
+
+.focal-hero-emblem {
+  position: relative;
+  width: min(380px, 86%);
+  padding: 30px 26px;
+  background:
+    repeating-linear-gradient(0deg, rgba(57, 197, 187, 0.03) 0 1px, transparent 1px 4px),
+    linear-gradient(155deg, rgba(13, 19, 28, 0.96), rgba(5, 7, 10, 0.98));
+  border: 2px solid rgba(57, 197, 187, 0.55);
+  box-shadow: 8px 8px 0 #020305, 12px 12px 0 rgba(57, 197, 187, 0.25), 0 0 46px rgba(57, 197, 187, 0.18);
+  display: grid;
+  gap: 14px;
+  place-items: center;
+  text-align: center;
+}
+
+.focal-hero-emblem::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  pointer-events: none;
+}
+
+.focal-hero-emblem-logo {
+  width: 100%;
+  max-width: 315px;
+  height: auto;
+  display: block;
+}
+
+.focal-hero-emblem-tag {
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  color: #39c5bb;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border: 1px solid rgba(57, 197, 187, 0.35);
+  background: rgba(57, 197, 187, 0.08);
+}
+
+/* Filter Bar (2-column clean layout without AI voice toggle) */
+.filter-bar {
+  grid-template-columns: minmax(0, 1fr) auto !important;
+}
+
+/* Tabs & Cards */
+.mod-view-tab {
+  --mod-view-tab-rgb: 57, 197, 187;
+  background: linear-gradient(180deg, rgba(57, 197, 187, 0.14), transparent 42%), #0b1017;
+  border-color: rgba(57, 197, 187, 0.34);
+}
+
+.mod-view-tab.active {
+  background: linear-gradient(180deg, rgba(57, 197, 187, 0.24), rgba(0, 216, 255, 0.08)), #0d1520;
+  border-color: #39c5bb;
+  color: #ffffff;
+}
+
+.mod-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 24%), #0b1017;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 5px 5px 0 #020305;
+}
+
+.mod-card:hover,
+.mod-card:focus-visible {
+  border-color: #39c5bb;
+  box-shadow: 6px 6px 0 rgba(57, 197, 187, 0.35), 0 0 26px rgba(57, 197, 187, 0.22);
+}
+
+.mod-cover-fallback {
+  background:
+    linear-gradient(135deg, rgba(57, 197, 187, 0.32), transparent 42%),
+    linear-gradient(145deg, rgba(0, 216, 255, 0.2), rgba(255, 255, 255, 0.06)),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0, rgba(255, 255, 255, 0.08) 1px, transparent 1px, transparent 16px),
+    #070a0f;
+  color: #ffffff;
+}
+
+.mod-status-ribbon-new {
+  --status-ribbon-rgb: 57, 197, 187;
+  color: #ffffff;
+}
+
+.mod-status-ribbon-update {
+  --status-ribbon-rgb: 0, 216, 255;
+  color: #ffffff;
+}
+
+.mod-highlight-label {
+  color: #e6f6f7;
+}
+
+.mod-page-button.active {
+  background: #39c5bb;
+  border-color: #39c5bb;
+  color: #05070a;
+}
+
+/* Install Guide Cyber Box */
+.focal-install-box {
+  padding: 12px 14px;
+  border: 1px solid rgba(57, 197, 187, 0.45);
+  border-left: 4px solid #39c5bb;
+  background: rgba(57, 197, 187, 0.08);
+  color: #e6f6f7;
+  font-size: 13.5px;
+  line-height: 1.65;
+}
+
+.focal-install-box strong {
+  display: block;
+  color: #00d8ff;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+/* Modal & Cursor Aura */
+.modal-panel {
+  background: linear-gradient(180deg, rgba(57, 197, 187, 0.08), transparent 22%), #0b1017;
+  border: 2px solid #39c5bb;
+  box-shadow: 10px 10px 0 #020305, 0 0 42px rgba(57, 197, 187, 0.24);
+}
+
+.cursor-aura {
+  background: radial-gradient(circle, rgba(57, 197, 187, 0.16), rgba(0, 216, 255, 0.05) 45%, transparent 72%);
+}
+
+/* Clean Pixel Footer */
+.focal-site-footer {
+  margin: 48px auto 32px;
+  padding: 20px 24px;
+  border: 1px solid rgba(57, 197, 187, 0.3);
+  background: #080c12;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: #94a8b8;
+  font-size: 13px;
+}
+
+.focal-site-footer strong {
+  color: #ffffff;
+}

@@ -1,0 +1,27 @@
+[
+  {
+    "id": "clannad-patch-th",
+    "title": "Clannad Patch ไทย",
+    "status": "published",
+    "badge": "NEW",
+    "coverImage": "./assets/images/games/clannad/cover.png",
+    "screenshots": [],
+    "highlights": [
+      "Focal Studio",
+      "Windows Installer"
+    ],
+    "updatedAgo": "ล่าสุด",
+    "updatedDate": "12 พ.ย. 2569",
+    "gameVersion": "Steam (CLANNAD)",
+    "modVersion": "10.5",
+    "steamUrl": "https://store.steampowered.com/app/324160/CLANNAD/",
+    "downloadUrl": "https://drive.google.com/file/d/11gmKyocUw5IPfuRswFFJWySMFn-KMv4F/view?usp=sharing",
+    "installGuide": "วิธีการติดตั้ง Patch นี้จะเหมือนกับการติดตั้งแอปบน Windows เลย (ต้องมีตัวเกม Clannad ในเครื่องที่ download บน Steam ก่อน)",
+    "updates": [
+      {
+        "version": "เวอร์ชั่น 1.0",
+        "notes": "- แพตช์แปลภาษาไทยสำหรับเกม Clannad (เวอร์ชัน Steam)\n- ติดตั้งผ่านตัวติดตั้งบน Windows ได้ทันที"
+      }
+    ]
+  }
+]
