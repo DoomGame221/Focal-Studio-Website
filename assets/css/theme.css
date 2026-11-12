@@ -272,7 +272,33 @@ body:before {
 }
 
 .cursor-aura {
-  background: radial-gradient(circle, rgba(57, 197, 187, 0.16), rgba(0, 216, 255, 0.05) 45%, transparent 72%);
+  background: radial-gradient(360px circle at var(--cursor-x) var(--cursor-y), rgba(57, 197, 187, 0.16), rgba(0, 216, 255, 0.05) 45%, transparent 72%);
+}
+
+.cursor-aura:after {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  clip-path: none;
+  box-shadow: none;
+  background: url("../images/focal-aperture.svg") center / contain no-repeat;
+  filter: drop-shadow(0 0 8px rgba(57, 197, 187, 0.65));
+  animation: focalFocusCursor 7s linear infinite;
+}
+
+@keyframes focalFocusCursor {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+    opacity: 0.92;
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(180deg) scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg) scale(1);
+    opacity: 0.92;
+  }
 }
 
 /* Clean Pixel Footer */
@@ -292,4 +318,99 @@ body:before {
 
 .focal-site-footer strong {
   color: #ffffff;
+}
+
+/* ==========================================================================
+   Mobile & Performance Optimizations (preserves Cyber/Pixel aesthetics)
+   ========================================================================== */
+html,
+body {
+  overflow-x: clip;
+}
+
+.mod-card,
+.mod-view-tab,
+.mod-page-button,
+.primary-action,
+.action-main,
+.action-secondary,
+.icon-text-button,
+.header-link {
+  touch-action: manipulation;
+}
+
+.mod-card {
+  content-visibility: auto;
+  contain-intrinsic-size: 560px;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .cursor-aura {
+    display: none;
+  }
+
+  .mod-card:active {
+    transform: scale(0.985);
+    border-color: #39c5bb;
+  }
+
+  .modal-backdrop {
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
+  }
+}
+
+@media (max-width: 720px) {
+  .mod-card {
+    height: auto;
+    min-height: 0;
+  }
+
+  .mod-catalog-main > .mod-grid {
+    padding-right: 40px;
+  }
+
+  .focal-hero-emblem {
+    width: 100%;
+    padding: 20px 18px;
+  }
+
+  .focal-header-logo {
+    height: 36px;
+  }
+}
+
+@media (max-width: 560px) {
+  .filter-bar {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .filter-bar .icon-text-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .core-header {
+    gap: 10px;
+  }
+
+  .core-header .header-note {
+    display: none;
+  }
+
+  .modal-panel {
+    padding: 18px !important;
+    max-height: 88dvh;
+  }
+
+  .modal-action-row > * {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .focal-site-footer {
+    padding: 16px;
+    font-size: 12px;
+  }
 }

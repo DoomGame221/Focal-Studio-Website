@@ -22,7 +22,7 @@
       updatedAgo: 'ล่าสุด',
       updatedDate: '12 พ.ย. 2569',
       gameVersion: 'Steam (CLANNAD)',
-      modVersion: '1.0',
+      modVersion: '10.5',
       steamUrl: 'https://store.steampowered.com/app/324160/CLANNAD/',
       downloadUrl:
         'https://drive.google.com/file/d/11gmKyocUw5IPfuRswFFJWySMFn-KMv4F/view?usp=sharing',
@@ -30,7 +30,6 @@
         'วิธีการติดตั้ง Patch นี้จะเหมือนกับการติดตั้งแอปบน Windows เลย (ต้องมีตัวเกม Clannad ในเครื่องที่ download บน Steam ก่อน)',
       updates: [
         {
-          version: 'เวอร์ชั่น 1.0',
           notes:
             '- แพตช์แปลภาษาไทยสำหรับเกม Clannad (เวอร์ชัน Steam)\n- ติดตั้งผ่านตัวติดตั้งบน Windows ได้ทันที',
         },
@@ -59,6 +58,7 @@
     pageNext: document.querySelector('.mod-pagination .mod-page-nav:last-of-type'),
     showingCountText: document.querySelector('#mods .section-heading p'),
     statTotal: document.querySelector('.core-stats > div:first-child dd'),
+    statUpdated: document.querySelector('.core-stats > div:nth-child(2) dd'),
     statDev: document.querySelector('.core-stat-development dd'),
     statDevLink: document.querySelector('.core-stat-link'),
     tabAllCount: document.querySelector('.mod-view-tab-all .mod-view-tab-count'),
@@ -67,10 +67,38 @@
   };
 
   async function init() {
+    initContentProtection();
     bindEvents();
     initCursorAura();
     initHeroCanvas();
     await loadMods();
+  }
+
+  /** Disable right-click context menu and common DevTools shortcuts (F12, Ctrl+Shift+I/J/C, Ctrl+U). */
+  function initContentProtection() {
+    els.rootHtml.classList.add('content-protection-active');
+
+    document.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      const key = String(e.key || '').toUpperCase();
+      const ctrlOrCmd = e.ctrlKey || e.metaKey;
+
+      if (e.key === 'F12' || e.keyCode === 123) {
+        e.preventDefault();
+        return;
+      }
+
+      if (
+        (e.ctrlKey && e.shiftKey && ['I', 'J', 'C', 'K'].includes(key)) ||
+        (e.metaKey && e.altKey && ['I', 'J', 'C'].includes(key)) ||
+        (ctrlOrCmd && key === 'U')
+      ) {
+        e.preventDefault();
+      }
+    });
   }
 
   /** Fetch ./data/mods.json and render cards into .mod-grid. */
@@ -106,6 +134,9 @@
     const devCount = state.mods.filter((m) => m.status === 'developing').length;
 
     if (els.statTotal) els.statTotal.textContent = String(total);
+    if (els.statUpdated && state.mods[0]?.updatedDate) {
+      els.statUpdated.textContent = state.mods[0].updatedDate;
+    }
     if (els.tabAllCount) els.tabAllCount.textContent = String(total);
     if (els.tabDevCount) els.tabDevCount.textContent = String(devCount);
     if (els.statDev) {
@@ -188,6 +219,15 @@
     }
   }
 
+  /** Resolve update entry version: uses mod.modVersion as single source of truth when omitted or 'auto'. */
+  function resolveUpdateVersion(mod, updateEntry, idx) {
+    const raw = typeof updateEntry?.version === 'string' ? updateEntry.version.trim() : '';
+    if (!raw || raw.toLowerCase() === 'auto') {
+      return idx === 0 ? `เวอร์ชั่น ${mod.modVersion || '1.0'}` : '';
+    }
+    return raw;
+  }
+
   /** Build a .mod-card element from a JSON entry. */
   function createModCard(mod, index) {
     const article = document.createElement('article');
@@ -225,8 +265,8 @@
 
     const updatesHtml = (mod.updates || [])
       .map(
-        (u) =>
-          `<li><strong>${escapeHtml(u.version)}</strong><p>${escapeHtml(u.notes)}</p></li>`
+        (u, idx) =>
+          `<li><strong>${escapeHtml(resolveUpdateVersion(mod, u, idx))}</strong><p>${escapeHtml(u.notes)}</p></li>`
       )
       .join('');
 
@@ -266,17 +306,19 @@
       ${steamHtml}
     `;
 
-    article.addEventListener('pointermove', (e) => {
-      const rect = article.getBoundingClientRect();
-      const x = (((e.clientX - rect.left) / rect.width) * 100).toFixed(2);
-      const y = (((e.clientY - rect.top) / rect.height) * 100).toFixed(2);
-      article.style.setProperty('--glare-on', '1');
-      article.style.setProperty('--glare-x', `${x}%`);
-      article.style.setProperty('--glare-y', `${y}%`);
-    });
-    article.addEventListener('pointerleave', () => {
-      article.style.setProperty('--glare-on', '0');
-    });
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      article.addEventListener('pointermove', (e) => {
+        const rect = article.getBoundingClientRect();
+        const x = (((e.clientX - rect.left) / rect.width) * 100).toFixed(2);
+        const y = (((e.clientY - rect.top) / rect.height) * 100).toFixed(2);
+        article.style.setProperty('--glare-on', '1');
+        article.style.setProperty('--glare-x', `${x}%`);
+        article.style.setProperty('--glare-y', `${y}%`);
+      });
+      article.addEventListener('pointerleave', () => {
+        article.style.setProperty('--glare-on', '0');
+      });
+    }
 
     article.addEventListener('click', (e) => {
       if (e.target.closest('.mod-steam-tab')) return;
@@ -391,8 +433,8 @@
 
     const updatesHtml = (mod.updates || [])
       .map(
-        (u) =>
-          `<div style="margin-bottom:10px;"><strong style="color:#39c5bb;">${escapeHtml(u.version)}</strong><p style="margin:4px 0 0;white-space:pre-line;color:#d6e6ea;font-size:14px;">${escapeHtml(u.notes)}</p></div>`
+        (u, idx) =>
+          `<div style="margin-bottom:10px;"><strong style="color:#39c5bb;">${escapeHtml(resolveUpdateVersion(mod, u, idx))}</strong><p style="margin:4px 0 0;white-space:pre-line;color:#d6e6ea;font-size:14px;">${escapeHtml(u.notes)}</p></div>`
       )
       .join('');
 
@@ -480,7 +522,7 @@
     );
   }
 
-  /** Miku Blue + Cyan + White animated particles on the hero background canvas. */
+  /** Miku Blue + Cyan + White animated particles on the hero background canvas (mobile-optimized). */
   function initHeroCanvas() {
     const canvas = els.worldCanvas;
     if (!canvas) return;
@@ -488,17 +530,17 @@
     if (!ctx) return;
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const maxDist = 135;
+    const maxDistSq = maxDist * maxDist;
     let width = 0;
     let height = 0;
+    let lastSeedWidth = 0;
     let particles = [];
+    let rafId = 0;
+    let isVisible = true;
 
-    function resize() {
-      const parent = canvas.parentElement;
-      width = parent ? parent.clientWidth : window.innerWidth;
-      height = parent ? parent.clientHeight : 700;
-      canvas.width = width;
-      canvas.height = height;
-      const count = Math.min(60, Math.max(22, Math.floor(width / 30)));
+    function seedParticles() {
+      const count = width < 640 ? 22 : Math.min(56, Math.max(24, Math.floor(width / 32)));
       particles = Array.from({ length: count }, (_, i) => ({
         x: Math.random() * width,
         y: Math.random() * height,
@@ -512,9 +554,26 @@
               ? 'rgba(57, 197, 187, 0.65)'
               : 'rgba(0, 216, 255, 0.5)',
       }));
+      lastSeedWidth = width;
+    }
+
+    function resize() {
+      const parent = canvas.parentElement;
+      const nextWidth = parent ? parent.clientWidth : window.innerWidth;
+      const nextHeight = parent ? parent.clientHeight : 700;
+      width = nextWidth;
+      height = nextHeight;
+      canvas.width = width;
+      canvas.height = height;
+
+      // Avoid resetting particles when mobile URL bar changes viewport height on scroll
+      if (particles.length === 0 || Math.abs(width - lastSeedWidth) > 24) {
+        seedParticles();
+      }
     }
 
     function draw() {
+      rafId = 0;
       ctx.clearRect(0, 0, width, height);
 
       for (let i = 0; i < particles.length; i += 1) {
@@ -533,26 +592,58 @@
 
         for (let j = i + 1; j < particles.length; j += 1) {
           const q = particles[j];
-          const dist = Math.hypot(p.x - q.x, p.y - q.y);
-          if (dist < 135) {
+          const dx = p.x - q.x;
+          const dy = p.y - q.y;
+          const distSq = dx * dx + dy * dy;
+          if (distSq < maxDistSq) {
+            const alpha = (1 - Math.sqrt(distSq) / maxDist) * 0.16;
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(q.x, q.y);
-            ctx.strokeStyle = `rgba(57, 197, 187, ${(1 - dist / 135) * 0.16})`;
+            ctx.strokeStyle = `rgba(57, 197, 187, ${alpha.toFixed(3)})`;
             ctx.lineWidth = 1;
             ctx.stroke();
           }
         }
       }
 
-      if (!reducedMotion) {
-        window.requestAnimationFrame(draw);
+      if (!reducedMotion && isVisible && !document.hidden) {
+        rafId = window.requestAnimationFrame(draw);
+      }
+    }
+
+    function startLoop() {
+      if (!rafId && !reducedMotion && isVisible && !document.hidden) {
+        rafId = window.requestAnimationFrame(draw);
+      }
+    }
+
+    function stopLoop() {
+      if (rafId) {
+        window.cancelAnimationFrame(rafId);
+        rafId = 0;
       }
     }
 
     resize();
     draw();
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', resize, { passive: true });
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(
+        (entries) => {
+          isVisible = entries[0]?.isIntersecting ?? true;
+          if (isVisible) startLoop();
+          else stopLoop();
+        },
+        { threshold: 0.02 }
+      ).observe(canvas);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stopLoop();
+      else startLoop();
+    });
   }
 
   function escapeHtml(str) {
