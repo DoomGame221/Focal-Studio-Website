@@ -1,13 +1,14 @@
 [
   {
     "id": "clannad-patch-th",
+    "category": "translation",
     "title": "Clannad Patch ไทย",
     "status": "published",
     "badge": "NEW",
     "coverImage": "./assets/images/games/clannad/cover.png",
     "screenshots": [],
     "highlights": [
-      "Focal Studio",
+      "แปลภาษาเกม",
       "Windows Installer"
     ],
     "updatedAgo": "ล่าสุด",
@@ -20,6 +21,32 @@
     "updates": [
       {
         "notes": "- แพตช์แปลภาษาไทยสำหรับเกม Clannad (เวอร์ชัน Steam)\n- ติดตั้งผ่านตัวติดตั้งบน Windows ได้ทันที"
+      }
+    ]
+  },
+  {
+    "id": "focal-studio-showcase",
+    "category": "github",
+    "title": "Focal Studio Web & Cover Maker",
+    "status": "published",
+    "badge": "PROJECT",
+    "coverImage": "",
+    "coverFallbackTag": "GITHUB PROJECT",
+    "screenshots": [],
+    "highlights": [
+      "GitHub Project",
+      "HTML / CSS / JS"
+    ],
+    "updatedAgo": "ล่าสุด",
+    "updatedDate": "13 พ.ย. 2569",
+    "techStack": "HTML / CSS / Vanilla JS",
+    "modVersion": "1.0",
+    "repoUrl": "https://github.com/",
+    "demoUrl": "./tools/cover-maker.html",
+    "installGuide": "แก้ไขลิงก์ repoUrl ใน data/mods.json เป็นลิงก์ GitHub Repository ของโปรเจกต์คุณ หรือเพิ่มโปรเจกต์ GitHub อื่นๆ ต่อท้ายในไฟล์เดียวกันได้เลย",
+    "updates": [
+      {
+        "notes": "- เว็บไซต์แสดงผลงาน Focal Studio ธีม Cyber / Pixel (Blue Miku / White / Black)\n- มาพร้อมเครื่องมือ Cover Maker (920×430) และระบบโหลดข้อมูลจาก data/mods.json"
       }
     ]
   }

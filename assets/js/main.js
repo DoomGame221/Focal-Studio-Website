@@ -1,7 +1,8 @@
 /**
- * Focal Studio - Dynamic JSON catalog & UI interactions for GitHub Pages.
- * Loads entries from ./data/mods.json and handles search, tabs, pagination,
- * detail modal with installGuide + Google Drive download, and cyber canvas.
+ * Focal Studio - Cyber/Pixel Works & Projects Showcase for GitHub Pages.
+ * Loads entries from ./data/mods.json and handles multi-category filtering
+ * (All, Game Translation, GitHub Project, Developing), search, pagination,
+ * detail modal, content protection, and mobile-optimized canvas particles.
  */
 (() => {
   'use strict';
@@ -9,16 +10,34 @@
   const MODS_JSON_URL = './data/mods.json';
   const PAGE_SIZE = 12;
 
+  const CATEGORY_META = {
+    translation: {
+      label: 'แปลภาษาเกม',
+      sideTabLabel: 'เปิดหน้า Steam',
+      spec1Label: 'เกม',
+      spec2Label: 'แพตช์',
+      installTitle: 'วิธีติดตั้งแพตช์ (Windows Installer)',
+    },
+    github: {
+      label: 'GitHub Project',
+      sideTabLabel: 'เปิด GitHub',
+      spec1Label: 'เทคโนโลยี',
+      spec2Label: 'เวอร์ชัน',
+      installTitle: 'รายละเอียด / วิธีใช้งานโปรเจกต์',
+    },
+  };
+
   // Fallback used only if opened directly via file:// where browser CORS blocks fetch().
   const FILE_PROTOCOL_FALLBACK = [
     {
       id: 'clannad-patch-th',
+      category: 'translation',
       title: 'Clannad Patch ไทย',
       status: 'published',
       badge: 'NEW',
       coverImage: './assets/images/games/clannad/cover.png',
       screenshots: [],
-      highlights: ['Focal Studio', 'Windows Installer'],
+      highlights: ['แปลภาษาเกม', 'Windows Installer'],
       updatedAgo: 'ล่าสุด',
       updatedDate: '12 พ.ย. 2569',
       gameVersion: 'Steam (CLANNAD)',
@@ -27,7 +46,7 @@
       downloadUrl:
         'https://drive.google.com/file/d/11gmKyocUw5IPfuRswFFJWySMFn-KMv4F/view?usp=sharing',
       installGuide:
-        'วิธีการติดตั้ง Patch นี้จะเหมือนกับการติดตั้งแอปบน Windows เลย (ต้องมีตัวเกม Clannad ในเครื่องที่ download บน Steam ก่อน)',
+        'วิธีการติดตั้ง Patch นี้จะเหมือนกับการติดตั้งแอปบน Windows เลย (ต้องมีตัวเกม Clannad ในเครื่องโดยการ Download ผ่าน Steam ก่อน)',
       updates: [
         {
           notes:
@@ -35,11 +54,36 @@
         },
       ],
     },
+    {
+      id: 'focal-studio-showcase',
+      category: 'github',
+      title: 'Focal Studio Web & Cover Maker',
+      status: 'published',
+      badge: 'PROJECT',
+      coverImage: '',
+      coverFallbackTag: 'GITHUB PROJECT',
+      screenshots: [],
+      highlights: ['GitHub Project', 'HTML / CSS / JS'],
+      updatedAgo: 'ล่าสุด',
+      updatedDate: '13 พ.ย. 2569',
+      techStack: 'HTML / CSS / Vanilla JS',
+      modVersion: '1.0',
+      repoUrl: 'https://github.com/',
+      demoUrl: './tools/cover-maker.html',
+      installGuide:
+        'แก้ไขลิงก์ repoUrl ใน data/mods.json เป็นลิงก์ GitHub Repository ของโปรเจกต์คุณ หรือเพิ่มโปรเจกต์ GitHub อื่นๆ ต่อท้ายในไฟล์เดียวกันได้เลย',
+      updates: [
+        {
+          notes:
+            '- เว็บไซต์แสดงผลงาน Focal Studio ธีม Cyber / Pixel (Blue Miku / White / Black)\n- มาพร้อมเครื่องมือ Cover Maker (920×430) และระบบโหลดข้อมูลจาก data/mods.json',
+        },
+      ],
+    },
   ];
 
   const state = {
     mods: [],
-    tab: 'all', // 'all' | 'development'
+    category: 'all', // 'all' | 'translation' | 'github' | 'developing'
     query: '',
     page: 1,
     usedFallback: false,
@@ -50,8 +94,7 @@
     modGrid: document.querySelector('.mod-grid'),
     searchInput: document.querySelector('.search-field input'),
     clearBtn: document.querySelector('.filter-bar .icon-text-button'),
-    tabAll: document.querySelector('.mod-view-tab-all'),
-    tabDev: document.querySelector('.mod-view-tab-development'),
+    categoryTabs: Array.from(document.querySelectorAll('.mod-view-tab[data-category]')),
     pagination: document.querySelector('.mod-pagination'),
     pageList: document.querySelector('.mod-page-list'),
     pagePrev: document.querySelector('.mod-pagination .mod-page-nav:first-of-type'),
@@ -61,8 +104,6 @@
     statUpdated: document.querySelector('.core-stats > div:nth-child(2) dd'),
     statDev: document.querySelector('.core-stat-development dd'),
     statDevLink: document.querySelector('.core-stat-link'),
-    tabAllCount: document.querySelector('.mod-view-tab-all .mod-view-tab-count'),
-    tabDevCount: document.querySelector('.mod-view-tab-development .mod-view-tab-count'),
     worldCanvas: document.querySelector('.world-canvas'),
   };
 
@@ -74,7 +115,7 @@
     await loadMods();
   }
 
-  /** Disable right-click context menu and common DevTools shortcuts (F12, Ctrl+Shift+I/J/C, Ctrl+U). */
+  /** Disable right-click context menu and common DevTools shortcuts. */
   function initContentProtection() {
     els.rootHtml.classList.add('content-protection-active');
 
@@ -128,17 +169,20 @@
     applyFilters();
   }
 
-  /** Update hero and tab counters based on loaded JSON entries. */
+  function getItemCategory(item) {
+    return item.category || 'translation';
+  }
+
+  /** Update hero and category tab counters based on loaded JSON entries. */
   function updateCounts() {
     const total = state.mods.length;
     const devCount = state.mods.filter((m) => m.status === 'developing').length;
+    const latestDate = state.mods[state.mods.length - 1]?.updatedDate || state.mods[0]?.updatedDate;
 
     if (els.statTotal) els.statTotal.textContent = String(total);
-    if (els.statUpdated && state.mods[0]?.updatedDate) {
-      els.statUpdated.textContent = state.mods[0].updatedDate;
+    if (els.statUpdated && latestDate) {
+      els.statUpdated.textContent = latestDate;
     }
-    if (els.tabAllCount) els.tabAllCount.textContent = String(total);
-    if (els.tabDevCount) els.tabDevCount.textContent = String(devCount);
     if (els.statDev) {
       const textNode = Array.from(els.statDev.childNodes).find(
         (n) => n.nodeType === Node.TEXT_NODE
@@ -150,28 +194,54 @@
     if (els.statDevLink) {
       els.statDevLink.setAttribute(
         'aria-label',
-        `ดูเกมที่กำลังพัฒนา ${devCount} รายการ`
+        `ดูผลงานที่กำลังพัฒนา ${devCount} รายการ`
       );
     }
+
+    els.categoryTabs.forEach((tabBtn) => {
+      const cat = tabBtn.dataset.category;
+      const countEl = tabBtn.querySelector('.mod-view-tab-count');
+      if (!countEl) return;
+
+      let count = total;
+      if (cat === 'developing') {
+        count = devCount;
+      } else if (cat !== 'all') {
+        count = state.mods.filter((m) => getItemCategory(m) === cat).length;
+      }
+      countEl.textContent = String(count);
+    });
   }
 
-  /** Filter mods from JSON and render current page cards. */
+  /** Filter items by active category and search query, then render current page. */
   function applyFilters() {
     if (!els.modGrid) return;
 
     const query = state.query.trim().toLowerCase();
-    const matched = state.mods.filter((mod) => {
-      const isDev = mod.status === 'developing';
-      if (state.tab === 'development' && !isDev) return false;
+    const matched = state.mods.filter((item) => {
+      const itemCat = getItemCategory(item);
+      if (state.category === 'developing' && item.status !== 'developing') {
+        return false;
+      }
+      if (
+        state.category !== 'all' &&
+        state.category !== 'developing' &&
+        itemCat !== state.category
+      ) {
+        return false;
+      }
 
       if (query) {
+        const meta = CATEGORY_META[itemCat] || CATEGORY_META.translation;
         const haystack = [
-          mod.title,
-          mod.gameVersion,
-          mod.modVersion,
-          mod.installGuide,
-          ...(mod.highlights || []),
-          ...(mod.updates || []).map((u) => `${u.version} ${u.notes}`),
+          item.title,
+          meta.label,
+          item.gameVersion,
+          item.techStack,
+          item.modVersion,
+          item.installGuide,
+          ...(item.highlights || []),
+          ...(item.updates || []).map((u) => `${u.version || ''} ${u.notes || ''}`),
         ]
           .join(' ')
           .toLowerCase();
@@ -195,88 +265,90 @@
       emptyEl.style.cssText =
         'grid-column:1/-1;padding:48px 20px;text-align:center;border:1px dashed rgba(57,197,187,0.45);color:#94a8b8;background:#0b1017;';
       emptyEl.innerHTML =
-        '<p style="margin:0 0 8px;font-size:18px;color:#ffffff;font-weight:700;">ไม่พบแพตช์ที่ตรงกับเงื่อนไข</p><p style="margin:0;font-size:14px;">ลองเปลี่ยนคำค้นหา หรือเพิ่มรายการเกมใน <code>data/mods.json</code></p>';
+        '<p style="margin:0 0 8px;font-size:18px;color:#ffffff;font-weight:700;">ไม่พบผลงานที่ตรงกับเงื่อนไข</p><p style="margin:0;font-size:14px;">ลองเปลี่ยนหมวดหมู่หรือคำค้นหา</p>';
       els.modGrid.appendChild(emptyEl);
     } else {
-      pageItems.forEach((mod, index) => {
-        els.modGrid.appendChild(createModCard(mod, index));
+      pageItems.forEach((item, index) => {
+        els.modGrid.appendChild(createWorkCard(item, index));
       });
-    }
-
-    if (state.usedFallback && window.location.protocol === 'file:') {
-      const note = document.createElement('p');
-      note.style.cssText =
-        'grid-column:1/-1;margin:8px 0 0;padding:10px 14px;border:1px solid rgba(57,197,187,0.35);background:#0b1017;color:#94a8b8;font-size:12px;';
-      note.innerHTML =
-        'หมายเหตุ: เปิดผ่าน <code>file://</code> เบราว์เซอร์จะบล็อกการอ่าน <code>data/mods.json</code> ชั่วคราว — เมื่ออัปขึ้น GitHub Pages หรือรันผ่าน Local Server จะโหลดจาก <code>data/mods.json</code> โดยตรง';
-      els.modGrid.appendChild(note);
     }
 
     renderPagination(matched.length, totalPages);
 
     if (els.showingCountText) {
-      els.showingCountText.textContent = `${matched.length} รายการในคลัง`;
+      els.showingCountText.textContent = `${matched.length} รายการในหมวดนี้`;
     }
   }
 
-  /** Resolve update entry version: uses mod.modVersion as single source of truth when omitted or 'auto'. */
-  function resolveUpdateVersion(mod, updateEntry, idx) {
+  /** Resolve update entry version: uses modVersion as single source of truth when omitted or 'auto'. */
+  function resolveUpdateVersion(item, updateEntry, idx) {
     const raw = typeof updateEntry?.version === 'string' ? updateEntry.version.trim() : '';
     if (!raw || raw.toLowerCase() === 'auto') {
-      return idx === 0 ? `เวอร์ชั่น ${mod.modVersion || '1.0'}` : '';
+      return idx === 0 ? `เวอร์ชั่น ${item.modVersion || '1.0'}` : '';
     }
     return raw;
   }
 
-  /** Build a .mod-card element from a JSON entry. */
-  function createModCard(mod, index) {
+  /** Build a .mod-card element for either a game translation or GitHub project. */
+  function createWorkCard(item, index) {
     const article = document.createElement('article');
-    const hasSteam = Boolean(mod.steamUrl);
+    const itemCat = getItemCategory(item);
+    const meta = CATEGORY_META[itemCat] || CATEGORY_META.translation;
+    const isGithub = itemCat === 'github';
+    const sideUrl = isGithub ? item.repoUrl || item.githubUrl : item.steamUrl;
+    const hasSideTab = Boolean(sideUrl);
+
     article.className = [
       'mod-card',
-      hasSteam ? 'has-steam-tab' : '',
+      hasSideTab ? 'has-steam-tab' : '',
       'has-freshness-badge',
     ]
       .filter(Boolean)
       .join(' ');
     article.tabIndex = 0;
-    article.dataset.modId = mod.id || `mod-${index}`;
+    article.dataset.modId = item.id || `work-${index}`;
+    article.dataset.category = itemCat;
     article.style.setProperty('--card-i', String(index));
-    article.setAttribute('aria-label', `เปิดรายละเอียด ${mod.title || 'แพตช์'}`);
+    article.setAttribute('aria-label', `เปิดรายละเอียด ${item.title || 'ผลงาน'}`);
 
-    const coverHtml = mod.coverImage
-      ? `<span class="mod-cover mod-cover-card mod-cover-image is-loaded"><img loading="lazy" decoding="async" alt="ภาพปก ${escapeHtml(mod.title)}" src="${escapeHtml(mod.coverImage)}"></span>`
-      : `<span class="mod-cover mod-cover-card mod-cover-fallback"><span>${escapeHtml(mod.coverFallbackTag || 'FOCAL TH')}</span><strong>${escapeHtml(mod.title)}</strong></span>`;
+    const coverHtml = item.coverImage
+      ? `<span class="mod-cover mod-cover-card mod-cover-image is-loaded"><img loading="lazy" decoding="async" alt="ภาพปก ${escapeHtml(item.title)}" src="${escapeHtml(item.coverImage)}"></span>`
+      : `<span class="mod-cover mod-cover-card mod-cover-fallback"><span>${escapeHtml(item.coverFallbackTag || meta.label)}</span><strong>${escapeHtml(item.title)}</strong></span>`;
 
-    const badgeType = String(mod.badge || '').toUpperCase();
+    const badgeType = String(item.badge || '').toUpperCase();
     const badgeHtml =
       badgeType === 'UPDATE'
         ? `<span class="mod-status-ribbon mod-status-ribbon-update new-update-badge" title="อัปเดตใหม่"><span class="mod-status-ribbon-label">UPDATE</span></span>`
-        : badgeType === 'NEW'
-          ? `<span class="mod-status-ribbon mod-status-ribbon-new new-update-badge" title="แพตช์ใหม่"><span class="mod-status-ribbon-label">NEW</span></span>`
-          : '';
+        : badgeType === 'PROJECT'
+          ? `<span class="mod-status-ribbon mod-status-ribbon-project new-update-badge" title="GitHub Project"><span class="mod-status-ribbon-label">PROJECT</span></span>`
+          : badgeType === 'NEW'
+            ? `<span class="mod-status-ribbon mod-status-ribbon-new new-update-badge" title="ผลงานใหม่"><span class="mod-status-ribbon-label">NEW</span></span>`
+            : '';
 
-    const tagsHtml = (mod.highlights || [])
+    const tagsHtml = (item.highlights || [])
       .map(
         (tag) =>
           `<span><b class="mod-highlight-label">${escapeHtml(tag)}</b></span>`
       )
       .join('');
 
-    const updatesHtml = (mod.updates || [])
+    const updatesHtml = (item.updates || [])
       .map(
         (u, idx) =>
-          `<li><strong>${escapeHtml(resolveUpdateVersion(mod, u, idx))}</strong><p>${escapeHtml(u.notes)}</p></li>`
+          `<li><strong>${escapeHtml(resolveUpdateVersion(item, u, idx))}</strong><p>${escapeHtml(u.notes)}</p></li>`
       )
       .join('');
 
-    const installPreviewHtml = mod.installGuide
-      ? `<div class="focal-install-box" style="margin-top:10px;"><strong>วิธีติดตั้ง</strong>${escapeHtml(mod.installGuide)}</div>`
+    const installPreviewHtml = item.installGuide
+      ? `<div class="focal-install-box" style="margin-top:10px;"><strong>${isGithub ? 'รายละเอียด' : 'วิธีติดตั้ง'}</strong>${escapeHtml(item.installGuide)}</div>`
       : '';
 
-    const steamHtml = hasSteam
-      ? `<a class="mod-steam-tab" href="${escapeHtml(mod.steamUrl)}" target="_blank" rel="noopener noreferrer" aria-label="เปิด ${escapeHtml(mod.title)} บน Steam ในแท็บใหม่" title="เปิดหน้า Steam: ${escapeHtml(mod.title)}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3h7v7"></path><path d="m10 14 11-11"></path><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"></path></svg><span>เปิดหน้า Steam</span></a>`
+    const sideTabHtml = hasSideTab
+      ? `<a class="mod-steam-tab${isGithub ? ' mod-github-tab' : ''}" href="${escapeHtml(sideUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(meta.sideTabLabel)}: ${escapeHtml(item.title)}" title="${escapeHtml(meta.sideTabLabel)}: ${escapeHtml(item.title)}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3h7v7"></path><path d="m10 14 11-11"></path><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"></path></svg><span>${escapeHtml(meta.sideTabLabel)}</span></a>`
       : '';
+
+    const spec1Val = isGithub ? item.techStack || item.gameVersion || '-' : item.gameVersion || '-';
+    const spec2Val = item.modVersion || '-';
 
     article.innerHTML = `
       <div class="mod-card-face">
@@ -285,25 +357,26 @@
           ${badgeHtml}
         </div>
         <div class="mod-card-body">
-          <div class="mod-card-title"><h3>${escapeHtml(mod.title)}</h3></div>
+          <span class="focal-category-pill${isGithub ? ' is-github' : ''}">${escapeHtml(meta.label)}</span>
+          <div class="mod-card-title"><h3>${escapeHtml(item.title)}</h3></div>
           <div class="tag-list" aria-label="คำไฮไลต์">${tagsHtml}</div>
           <div class="mod-card-freshness" aria-label="เวลาอัปเดตล่าสุด">
-            <span>${escapeHtml(mod.updatedAgo || 'อัปเดตล่าสุด')}</span>
-            <span>${escapeHtml(mod.updatedDate || '')}</span>
+            <span>${escapeHtml(item.updatedAgo || 'อัปเดตล่าสุด')}</span>
+            <span>${escapeHtml(item.updatedDate || '')}</span>
           </div>
           <div class="mod-card-content">
-            ${updatesHtml ? `<section class="mod-update-timeline" aria-label="อัปเดตแพตช์"><span class="mod-update-timeline-heading">บันทึกเวอร์ชัน</span><ol>${updatesHtml}</ol></section>` : ''}
+            ${updatesHtml ? `<section class="mod-update-timeline" aria-label="บันทึกเวอร์ชัน"><span class="mod-update-timeline-heading">บันทึกเวอร์ชัน</span><ol>${updatesHtml}</ol></section>` : ''}
             ${installPreviewHtml}
           </div>
           <div class="mod-card-footer">
-            <dl class="mod-card-version-list" aria-label="เวอร์ชันที่รองรับ">
-              <div><dt>เกม</dt><dd title="${escapeHtml(mod.gameVersion || '-')}">${escapeHtml(mod.gameVersion || '-')}</dd></div>
-              <div><dt>แพตช์</dt><dd title="${escapeHtml(mod.modVersion || '-')}">${escapeHtml(mod.modVersion || '-')}</dd></div>
+            <dl class="mod-card-version-list" aria-label="ข้อมูลรุ่น">
+              <div><dt>${escapeHtml(meta.spec1Label)}</dt><dd title="${escapeHtml(spec1Val)}">${escapeHtml(spec1Val)}</dd></div>
+              <div><dt>${escapeHtml(meta.spec2Label)}</dt><dd title="${escapeHtml(spec2Val)}">${escapeHtml(spec2Val)}</dd></div>
             </dl>
           </div>
         </div>
       </div>
-      ${steamHtml}
+      ${sideTabHtml}
     `;
 
     if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
@@ -322,14 +395,14 @@
 
     article.addEventListener('click', (e) => {
       if (e.target.closest('.mod-steam-tab')) return;
-      openModModal(mod);
+      openWorkModal(item);
     });
 
     article.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         if (e.target.closest('a, button')) return;
         e.preventDefault();
-        openModModal(mod);
+        openWorkModal(item);
       }
     });
 
@@ -363,20 +436,16 @@
     if (els.pageNext) els.pageNext.disabled = state.page >= totalPages;
   }
 
-  function setTab(nextTab) {
-    state.tab = nextTab;
+  function setCategory(nextCategory) {
+    state.category = nextCategory;
     state.page = 1;
 
-    if (els.tabAll) {
-      const active = nextTab === 'all';
-      els.tabAll.classList.toggle('active', active);
-      els.tabAll.setAttribute('aria-pressed', String(active));
-    }
-    if (els.tabDev) {
-      const active = nextTab === 'development';
-      els.tabDev.classList.toggle('active', active);
-      els.tabDev.setAttribute('aria-pressed', String(active));
-    }
+    els.categoryTabs.forEach((tabBtn) => {
+      const active = tabBtn.dataset.category === nextCategory;
+      tabBtn.classList.toggle('active', active);
+      tabBtn.setAttribute('aria-pressed', String(active));
+    });
+
     applyFilters();
   }
 
@@ -391,14 +460,17 @@
       state.query = '';
       state.page = 1;
       if (els.searchInput) els.searchInput.value = '';
-      setTab('all');
+      setCategory('all');
     });
 
-    els.tabAll?.addEventListener('click', () => setTab('all'));
-    els.tabDev?.addEventListener('click', () => setTab('development'));
+    els.categoryTabs.forEach((tabBtn) => {
+      tabBtn.addEventListener('click', () => {
+        setCategory(tabBtn.dataset.category || 'all');
+      });
+    });
 
     els.statDevLink?.addEventListener('click', () => {
-      setTab('development');
+      setCategory('developing');
       document.getElementById('mods')?.scrollIntoView({ behavior: 'smooth' });
     });
 
@@ -417,71 +489,91 @@
     });
   }
 
-  function openModModal(mod) {
+  function openWorkModal(item) {
+    const itemCat = getItemCategory(item);
+    const meta = CATEGORY_META[itemCat] || CATEGORY_META.translation;
+    const isGithub = itemCat === 'github';
+
     const backdrop = document.createElement('div');
     backdrop.className = 'modal-backdrop';
     backdrop.setAttribute('role', 'dialog');
     backdrop.setAttribute('aria-modal', 'true');
-    backdrop.setAttribute('aria-label', mod.title || 'รายละเอียดแพตช์');
+    backdrop.setAttribute('aria-label', item.title || 'รายละเอียดผลงาน');
 
-    const highlightsHtml = (mod.highlights || [])
+    const highlightsHtml = (item.highlights || [])
       .map(
         (h) =>
           `<span style="display:inline-block;padding:4px 10px;border:1px solid rgba(57,197,187,0.45);background:rgba(57,197,187,0.12);color:#7af2ec;font-size:12px;">${escapeHtml(h)}</span>`
       )
       .join(' ');
 
-    const updatesHtml = (mod.updates || [])
+    const updatesHtml = (item.updates || [])
       .map(
         (u, idx) =>
-          `<div style="margin-bottom:10px;"><strong style="color:#39c5bb;">${escapeHtml(resolveUpdateVersion(mod, u, idx))}</strong><p style="margin:4px 0 0;white-space:pre-line;color:#d6e6ea;font-size:14px;">${escapeHtml(u.notes)}</p></div>`
+          `<div style="margin-bottom:10px;"><strong style="color:#39c5bb;">${escapeHtml(resolveUpdateVersion(item, u, idx))}</strong><p style="margin:4px 0 0;white-space:pre-line;color:#d6e6ea;font-size:14px;">${escapeHtml(u.notes)}</p></div>`
       )
       .join('');
 
     const screenshotsHtml =
-      Array.isArray(mod.screenshots) && mod.screenshots.length > 0
-        ? `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">${mod.screenshots
+      Array.isArray(item.screenshots) && item.screenshots.length > 0
+        ? `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">${item.screenshots
             .map(
               (src) =>
-                `<img src="${escapeHtml(src)}" alt="ภาพตัวอย่าง ${escapeHtml(mod.title)}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border:1px solid rgba(57,197,187,0.35);">`
+                `<img src="${escapeHtml(src)}" alt="ภาพตัวอย่าง ${escapeHtml(item.title)}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border:1px solid rgba(57,197,187,0.35);">`
             )
             .join('')}</div>`
         : '';
 
-    const installHtml = mod.installGuide
-      ? `<div class="focal-install-box"><strong>วิธีติดตั้งแพตช์ (Windows Installer)</strong>${escapeHtml(mod.installGuide)}</div>`
+    const installHtml = item.installGuide
+      ? `<div class="focal-install-box"><strong>${escapeHtml(meta.installTitle)}</strong>${escapeHtml(item.installGuide)}</div>`
       : '';
 
-    const isGoogleDrive =
-      typeof mod.downloadUrl === 'string' &&
-      mod.downloadUrl.includes('drive.google.com');
-    const downloadLabel = isGoogleDrive
-      ? 'ดาวน์โหลดแพตช์ (Google Drive) ↗'
-      : 'ดาวน์โหลดแพตช์ ↗';
+    let actionsHtml = '';
+    if (isGithub) {
+      const repoUrl = item.repoUrl || item.githubUrl;
+      const demoUrl = item.demoUrl || item.downloadUrl;
+      actionsHtml = `
+        ${repoUrl ? `<a class="primary-action" href="${escapeHtml(repoUrl)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;padding:12px 20px;display:inline-flex;align-items:center;font-weight:700;">เปิด Repository บน GitHub ↗</a>` : ''}
+        ${demoUrl ? `<a class="action-secondary" href="${escapeHtml(demoUrl)}" target="_blank" rel="noopener noreferrer" style="padding:12px 18px;text-decoration:none;border:1px solid rgba(57,197,187,0.45);">เปิดใช้งาน / Demo ↗</a>` : ''}
+      `;
+    } else {
+      const isGoogleDrive =
+        typeof item.downloadUrl === 'string' &&
+        item.downloadUrl.includes('drive.google.com');
+      const downloadLabel = isGoogleDrive
+        ? 'ดาวน์โหลดแพตช์ (Google Drive) ↗'
+        : 'ดาวน์โหลดแพตช์ ↗';
+      const downloadBtn = item.downloadUrl
+        ? `<a class="primary-action" href="${escapeHtml(item.downloadUrl)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;padding:12px 20px;display:inline-flex;align-items:center;font-weight:700;">${downloadLabel}</a>`
+        : `<button type="button" class="primary-action" disabled style="opacity:0.65;cursor:not-allowed;padding:12px 20px;">ยังไม่ได้ใส่ลิงก์ดาวน์โหลด</button>`;
+      const steamBtn = item.steamUrl
+        ? `<a class="action-secondary" href="${escapeHtml(item.steamUrl)}" target="_blank" rel="noopener noreferrer" style="padding:12px 18px;text-decoration:none;border:1px solid rgba(57,197,187,0.45);">เปิดหน้า Steam ↗</a>`
+        : '';
+      actionsHtml = `${downloadBtn}${steamBtn}`;
+    }
 
-    const downloadActionHtml = mod.downloadUrl
-      ? `<a class="primary-action" href="${escapeHtml(mod.downloadUrl)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;padding:12px 20px;display:inline-flex;align-items:center;font-weight:700;">${downloadLabel}</a>`
-      : `<button type="button" class="primary-action" disabled style="opacity:0.65;cursor:not-allowed;padding:12px 20px;">ยังไม่ได้ใส่ลิงก์ดาวน์โหลด (แก้ที่ data/mods.json)</button>`;
+    const spec1Val = isGithub ? item.techStack || item.gameVersion || '-' : item.gameVersion || '-';
+    const spec2Val = item.modVersion || '-';
 
     backdrop.innerHTML = `
       <div class="modal-panel" style="padding:24px;max-width:760px;">
         <button type="button" class="icon-text-button modal-close" aria-label="ปิดหน้าต่าง">ปิด ✕</button>
         <div class="modal-content" style="display:grid;gap:16px;">
-          ${mod.coverImage ? `<img src="${escapeHtml(mod.coverImage)}" alt="${escapeHtml(mod.title)}" style="width:100%;aspect-ratio:460/215;object-fit:cover;border:1px solid rgba(57,197,187,0.4);">` : ''}
+          ${item.coverImage ? `<img src="${escapeHtml(item.coverImage)}" alt="${escapeHtml(item.title)}" style="width:100%;aspect-ratio:460/215;object-fit:cover;border:1px solid rgba(57,197,187,0.4);">` : ''}
           <div>
-            <h2 style="margin:0 0 10px;font-size:24px;color:#ffffff;">${escapeHtml(mod.title)}</h2>
+            <span class="focal-category-pill${isGithub ? ' is-github' : ''}">${escapeHtml(meta.label)}</span>
+            <h2 style="margin:0 0 10px;font-size:24px;color:#ffffff;">${escapeHtml(item.title)}</h2>
             <div style="display:flex;flex-wrap:wrap;gap:8px;">${highlightsHtml}</div>
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;">
-            <div style="padding:8px 12px;border:1px solid rgba(255,255,255,0.14);background:#05070a;"><small style="display:block;color:#94a8b8;font-size:11px;">เวอร์ชันเกมที่รองรับ</small><strong style="color:#ffffff;font-size:13px;">${escapeHtml(mod.gameVersion || '-')}</strong></div>
-            <div style="padding:8px 12px;border:1px solid rgba(255,255,255,0.14);background:#05070a;"><small style="display:block;color:#94a8b8;font-size:11px;">เวอร์ชันแพตช์</small><strong style="color:#39c5bb;font-size:13px;">${escapeHtml(mod.modVersion || '-')}</strong></div>
+            <div style="padding:8px 12px;border:1px solid rgba(255,255,255,0.14);background:#05070a;"><small style="display:block;color:#94a8b8;font-size:11px;">${escapeHtml(meta.spec1Label)}</small><strong style="color:#ffffff;font-size:13px;">${escapeHtml(spec1Val)}</strong></div>
+            <div style="padding:8px 12px;border:1px solid rgba(255,255,255,0.14);background:#05070a;"><small style="display:block;color:#94a8b8;font-size:11px;">${escapeHtml(meta.spec2Label)}</small><strong style="color:#39c5bb;font-size:13px;">${escapeHtml(spec2Val)}</strong></div>
           </div>
           ${installHtml}
           ${updatesHtml ? `<div style="padding:14px;border:1px solid rgba(57,197,187,0.28);background:#05070a;">${updatesHtml}</div>` : ''}
           ${screenshotsHtml}
           <div class="modal-action-row" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
-            ${downloadActionHtml}
-            ${mod.steamUrl ? `<a class="action-secondary" href="${escapeHtml(mod.steamUrl)}" target="_blank" rel="noopener noreferrer" style="padding:12px 18px;text-decoration:none;border:1px solid rgba(57,197,187,0.45);">เปิดหน้า Steam ↗</a>` : ''}
+            ${actionsHtml}
           </div>
         </div>
       </div>
@@ -566,7 +658,6 @@
       canvas.width = width;
       canvas.height = height;
 
-      // Avoid resetting particles when mobile URL bar changes viewport height on scroll
       if (particles.length === 0 || Math.abs(width - lastSeedWidth) > 24) {
         seedParticles();
       }

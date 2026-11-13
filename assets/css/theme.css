@@ -190,16 +190,96 @@ body:before {
   grid-template-columns: minmax(0, 1fr) auto !important;
 }
 
-/* Tabs & Cards */
+/* Tabs & Cards (Multi-category Showcase) */
+.mod-view-tabs {
+  grid-template-rows: repeat(4, minmax(140px, 1fr));
+  min-height: 620px;
+}
+
 .mod-view-tab {
   --mod-view-tab-rgb: 57, 197, 187;
   background: linear-gradient(180deg, rgba(57, 197, 187, 0.14), transparent 42%), #0b1017;
   border-color: rgba(57, 197, 187, 0.34);
 }
 
+.mod-view-tab[data-category="github"] {
+  --mod-view-tab-rgb: 0, 216, 255;
+}
+
+.mod-view-tab[data-category="developing"] {
+  --mod-view-tab-rgb: 255, 255, 255;
+}
+
 .mod-view-tab.active {
   background: linear-gradient(180deg, rgba(57, 197, 187, 0.24), rgba(0, 216, 255, 0.08)), #0d1520;
   border-color: #39c5bb;
+  color: #ffffff;
+}
+
+.mod-view-tab[data-category="github"].active {
+  border-color: #00d8ff;
+}
+
+.focal-category-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid rgba(57, 197, 187, 0.45);
+  background: rgba(57, 197, 187, 0.12);
+  color: #39c5bb;
+  margin-bottom: 6px;
+  width: fit-content;
+}
+
+.focal-category-pill.is-github {
+  border-color: rgba(0, 216, 255, 0.55);
+  background: rgba(0, 216, 255, 0.12);
+  color: #00d8ff;
+}
+
+.mod-status-ribbon-project {
+  --status-ribbon-rgb: 0, 216, 255;
+  color: #ffffff;
+}
+
+.mod-github-tab {
+  border-color: rgba(0, 216, 255, 0.65);
+  color: #00d8ff;
+  background:
+    repeating-linear-gradient(transparent 0, transparent 13px, rgba(255, 255, 255, 0.03) 13px, rgba(255, 255, 255, 0.03) 14px),
+    linear-gradient(rgba(0, 216, 255, 0.22), transparent 70%),
+    #08131d;
+}
+
+.mod-cover-fallback {
+  background:
+    linear-gradient(135deg, rgba(57, 197, 187, 0.28), transparent 48%),
+    linear-gradient(145deg, rgba(0, 216, 255, 0.2), rgba(255, 255, 255, 0.06)),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0, rgba(255, 255, 255, 0.07) 1px, transparent 1px, transparent 16px),
+    #070a0f;
+  color: #ffffff;
+  justify-content: center;
+  gap: 10px;
+}
+
+.mod-cover-fallback > span {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: #39c5bb;
+  padding: 3px 8px;
+  border: 1px solid rgba(57, 197, 187, 0.45);
+  background: rgba(5, 7, 10, 0.75);
+  width: fit-content;
+}
+
+.mod-cover-fallback > strong {
+  font-size: 20px;
+  line-height: 1.25;
   color: #ffffff;
 }
 
@@ -213,15 +293,6 @@ body:before {
 .mod-card:focus-visible {
   border-color: #39c5bb;
   box-shadow: 6px 6px 0 rgba(57, 197, 187, 0.35), 0 0 26px rgba(57, 197, 187, 0.22);
-}
-
-.mod-cover-fallback {
-  background:
-    linear-gradient(135deg, rgba(57, 197, 187, 0.32), transparent 42%),
-    linear-gradient(145deg, rgba(0, 216, 255, 0.2), rgba(255, 255, 255, 0.06)),
-    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0, rgba(255, 255, 255, 0.08) 1px, transparent 1px, transparent 16px),
-    #070a0f;
-  color: #ffffff;
 }
 
 .mod-status-ribbon-new {
@@ -361,6 +432,12 @@ body {
 }
 
 @media (max-width: 720px) {
+  .mod-view-tabs {
+    grid-template-rows: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-height: 0;
+  }
+
   .mod-card {
     height: auto;
     min-height: 0;

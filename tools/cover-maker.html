@@ -234,7 +234,15 @@
         <h2>1. ตั้งค่ากรอบและรูปภาพ</h2>
 
         <label class="field">
-          เลือกรูปเกม (.bmp, .png, .jpg, .webp)
+          หมวดหมู่ผลงาน (Category)
+          <select id="categorySelect">
+            <option value="translation">แปลภาษาเกม (Game Localization)</option>
+            <option value="github">GitHub Project (Open Source / Tool)</option>
+          </select>
+        </label>
+
+        <label class="field">
+          เลือกรูปเกมหรือโปรเจกต์ (.bmp, .png, .jpg, .webp)
           <input id="imageInput" type="file" accept="image/*">
         </label>
 
@@ -314,6 +322,7 @@
       const ctx = canvas.getContext('2d');
 
       const inputs = {
+        category: document.getElementById('categorySelect'),
         image: document.getElementById('imageInput'),
         tag: document.getElementById('tagInput'),
         title: document.getElementById('titleInput'),
@@ -487,33 +496,60 @@
       }
 
       function updateJsonPreview() {
-        const slug = (inputs.slug.value || 'game-id')
+        const category = inputs.category.value;
+        const slug = (inputs.slug.value || 'project-id')
           .trim()
           .toLowerCase()
           .replace(/[^a-z0-9-_]+/g, '-');
-        const title = inputs.title.value.trim() || 'ชื่อเกม';
+        const title = inputs.title.value.trim() || 'ชื่อผลงาน';
 
-        const snippet = {
-          id: `${slug}-patch-th`,
-          title: `${title} Patch ไทย`,
-          status: 'published',
-          badge: 'NEW',
-          coverImage: `./assets/images/games/${slug}/cover.png`,
-          screenshots: [],
-          highlights: ['Focal Studio', 'Windows Installer'],
-          updatedAgo: 'ล่าสุด',
-          updatedDate: '12 พ.ย. 2569',
-          gameVersion: 'Steam / PC',
-          modVersion: '1.0',
-          steamUrl: 'https://store.steampowered.com/',
-          downloadUrl: 'https://drive.google.com/...',
-          installGuide: 'วิธีการติดตั้ง Patch นี้จะเหมือนกับการติดตั้งแอปบน Windows เลย (ต้องมีตัวเกมในเครื่องที่ download บน Steam ก่อน)',
-          updates: [
-            {
-              notes: `- แพตช์แปลภาษาไทยสำหรับเกม ${title}`
+        const snippet = category === 'github'
+          ? {
+              id: slug,
+              category: 'github',
+              title,
+              status: 'published',
+              badge: 'PROJECT',
+              coverImage: `./assets/images/projects/${slug}/cover.png`,
+              coverFallbackTag: 'GITHUB PROJECT',
+              screenshots: [],
+              highlights: ['Open Source', 'GitHub'],
+              techStack: ['JavaScript', 'HTML/CSS'],
+              updatedAgo: 'ล่าสุด',
+              updatedDate: '13 พ.ย. 2569',
+              gameVersion: 'GitHub Repository',
+              modVersion: '1.0',
+              repoUrl: `https://github.com/FocalStudio/${slug}`,
+              demoUrl: '',
+              installGuide: 'เปิดดูซอร์สโค้ดหรือ Clone โปรเจกต์จาก GitHub เพื่อใช้งานและพัฒนาต่อได้ทันที',
+              updates: [
+                {
+                  notes: `- เปิดตัวโปรเจกต์ ${title} บน GitHub`
+                }
+              ]
             }
-          ]
-        };
+          : {
+              id: `${slug}-patch-th`,
+              category: 'translation',
+              title: `${title} Patch ไทย`,
+              status: 'published',
+              badge: 'NEW',
+              coverImage: `./assets/images/games/${slug}/cover.png`,
+              screenshots: [],
+              highlights: ['Focal Studio', 'Windows Installer'],
+              updatedAgo: 'ล่าสุด',
+              updatedDate: '13 พ.ย. 2569',
+              gameVersion: 'Steam / PC',
+              modVersion: '1.0',
+              steamUrl: 'https://store.steampowered.com/',
+              downloadUrl: 'https://drive.google.com/...',
+              installGuide: 'วิธีการติดตั้ง Patch นี้จะเหมือนกับการติดตั้งแอปบน Windows เลย (ต้องมีตัวเกมในเครื่องโดยการ Download ผ่าน Steam ก่อน)',
+              updates: [
+                {
+                  notes: `- แพตช์แปลภาษาไทยสำหรับเกม ${title}`
+                }
+              ]
+            };
         jsonPreview.textContent = JSON.stringify(snippet, null, 2);
       }
 
